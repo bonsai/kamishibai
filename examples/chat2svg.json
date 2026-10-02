@@ -1,0 +1,49 @@
+{
+  "schema": "kamishibai.story.v1",
+  "title": "Chat2SVG 論文要約",
+  "duration_seconds": 30,
+  "scenes": [
+    {
+      "id": "op",
+      "template": "title",
+      "duration_ms": 2000,
+      "data": {
+        "title": "Chat2SVG",
+        "subtitle": "LLM + Diffusion で破綻しない SVG 生成"
+      }
+    },
+    {
+      "id": "stage1",
+      "template": "speech-bubble",
+      "duration_ms": 12000,
+      "data": {
+        "characters": [{"position": "left", "color": "#f4a261", "body": "#457b9d"}],
+        "bubbles": [
+          {"speaker": "ユーザ", "position": "right", "text": "猫の SVG を作って。でも座標だけ最適化すると、線が交差して壊れる…", "delay_ms": 1000},
+          {"speaker": "Stage 1: LLM", "position": "top", "text": "テキストから semantic template を生成。図形の種類や配置を意味レベルで決める。", "delay_ms": 4000}
+        ],
+        "narration": "第一段階で LLM がプリミティブから構造を生成。"
+      }
+    },
+    {
+      "id": "stage2",
+      "template": "speech-bubble",
+      "duration_ms": 12000,
+      "data": {
+        "bubbles": [
+          {"speaker": "Stage 2: Diffusion", "position": "top", "text": "ControlNet tile でテンプレートに陰影・質感・細部を加える。座標の直接最適化は避ける。", "delay_ms": 1000}
+        ],
+        "narration": "第二段階で diffusion が細部を描き、自己交差を防ぐ。"
+      }
+    },
+    {
+      "id": "end",
+      "template": "title",
+      "duration_ms": 3000,
+      "data": {
+        "title": "結果",
+        "subtitle": "自己交差なし、編集可能な SVG が完成 🐱"
+      }
+    }
+  ]
+}

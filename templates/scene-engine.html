@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>kamishibai scene engine</title>
+  <link rel="stylesheet" href="kamishibai.css">
+</head>
+<body>
+  <div id="stage"></div>
+  <script src="../js/kamishibai.js"></script>
+  <script>
+    async function loadStory() {
+      const params = new URLSearchParams(location.search);
+      const storyUrl = params.get('story') || '../examples/paper-loop.json';
+      const res = await fetch(storyUrl);
+      const story = await res.json();
+      const show = new Kamishibai(document.getElementById('stage'), story);
+      show.play();
+    }
+    loadStory();
+  </script>
+</body>
+</html>

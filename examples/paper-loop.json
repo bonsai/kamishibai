@@ -1,0 +1,83 @@
+{
+  "schema": "kamishibai.story.v1",
+  "title": "アニメ生成の自律ループ",
+  "duration_seconds": 60,
+  "scenes": [
+    {
+      "id": "op",
+      "template": "title",
+      "duration_ms": 3000,
+      "data": {
+        "title": "アニメ生成の自律ループ",
+        "subtitle": "8 論文 × 4 接合の要約"
+      }
+    },
+    {
+      "id": "problem",
+      "template": "speech-bubble",
+      "duration_ms": 14000,
+      "data": {
+        "characters": [
+          {"position": "left", "color": "#f4a261", "body": "#457b9d"},
+          {"position": "right", "color": "#2a9d8f", "body": "#e9c46a"}
+        ],
+        "bubbles": [
+          {"speaker": "監督", "position": "right", "text": "AI で背景や素材を量産したい。でもキャラの顔が崩れたり、構図がおかしくなる…", "delay_ms": 2000},
+          {"speaker": "技術者", "position": "left", "text": "しかも全員同じ「平均的なキレイ」しか出せない。私たちの絵柄が消える。", "delay_ms": 6000}
+        ],
+        "narration": "生成モデルは便利だが、構成崩壊・同一化・個性喪失が課題（P22）。"
+      }
+    },
+    {
+      "id": "proposal",
+      "template": "speech-bubble",
+      "duration_ms": 15000,
+      "data": {
+        "characters": [
+          {"position": "left", "color": "#2a9d8f", "body": "#e9c46a"}
+        ],
+        "bubbles": [
+          {"speaker": "技術者", "position": "top", "text": "AniME や Iterative Refinement の方式を借りる。Director agent が MCP ツールを選び、VLM が生成結果を採点。", "delay_ms": 1000},
+          {"speaker": "監督", "position": "top", "text": "つまり、生成→評価→修正を自動で回す？", "delay_ms": 4000}
+        ],
+        "narration": "生成物をループに入れ、VLM critic による自律的改善枠組み（P01, P05）。"
+      }
+    },
+    {
+      "id": "trap",
+      "template": "speech-bubble",
+      "duration_ms": 15000,
+      "data": {
+        "bubbles": [
+          {"speaker": "警報", "position": "top", "text": "5 回自己再学習で顔が崩壊。3% synthetic 混入で劣化開始。", "delay_ms": 1000},
+          {"speaker": "技術者", "position": "top", "text": "Neural Resonance の指摘だ。無制限ループは collapse する。", "delay_ms": 4000},
+          {"speaker": "技術者", "position": "top", "text": "既存 RM は本作の絵を低評価にする。PAMELA で個人別 RM、Chat2SVG 式 2-stage で破綻を防ぐ。", "delay_ms": 7000}
+        ],
+        "narration": "ループにはガードが必須。既存評価軸では個性が潰される（P08, P22）。"
+      }
+    },
+    {
+      "id": "solution",
+      "template": "yonkoma",
+      "duration_ms": 13000,
+      "data": {
+        "panels": [
+          {"label": "IC-LoRA", "text": "20〜100 枚でスタイル適応。少数例で個性を学ぶ。"},
+          {"label": "SLAO", "text": "複数 LoRA を 1 本に統合。忘却回避・一定メモリ。"},
+          {"label": "PAMELA", "text": "個人別 reward model。あなたの好みを機械化。"},
+          {"label": "Chat2SVG", "text": "semantic template → diffusion の 2-stage。破綻防止。"}
+        ],
+        "narration": "少データ適応・継続統合・個人別評価・破綻防止の 4 接合が新規性。"
+      }
+    },
+    {
+      "id": "end",
+      "template": "title",
+      "duration_ms": 4000,
+      "data": {
+        "title": "4 接合の新規性",
+        "subtitle": "監督＋オントロジ / 注入ループ＋崩壊ガード / 履歴→1本LoRA / 個人別RM"
+      }
+    }
+  ]
+}
