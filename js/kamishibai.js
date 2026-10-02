@@ -7,6 +7,9 @@
  *   - css: optional path to template stylesheet
  *   - setup(engine): optional object merged into the engine
  *
+ * Options:
+ *   - onSceneEnd(index): callback fired when a scene finishes rendering
+ *
  * @example
  * const show = new Kamishibai(stageEl, story, { plugins: [title, speechBubble] });
  * await show.play();
@@ -18,6 +21,7 @@ class Kamishibai {
     this.story = story;
     this.current = 0;
     this.timers = [];
+    this.options = options;
     this.templates = {};
     this.cssLoaded = Promise.resolve();
 
@@ -73,6 +77,9 @@ class Kamishibai {
       this.stage.innerHTML = '';
       this.renderScene(scene).then((el) => {
         this.stage.appendChild(el);
+        if (typeof this.options.onSceneEnd === 'function') {
+          this.options.onSceneEnd(this.current, el);
+        }
       });
       const timer = setTimeout(() => resolve(), scene.duration_ms);
       this.timers.push(timer);

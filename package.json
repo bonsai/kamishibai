@@ -1,0 +1,41 @@
+{
+  "name": "kamishibai",
+  "version": "1.1.0",
+  "description": "Paper-story animation engine - turn JSON into scene-based animated shows",
+  "main": "js/kamishibai.js",
+  "types": "js/kamishibai.d.ts",
+  "bin": {
+    "kamishibai": "./bin/kamishibai.js"
+  },
+  "scripts": {
+    "start": "cd templates && python3 -m http.server 8080",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "js/",
+    "bin/",
+    "cli/",
+    "templates/",
+    "examples/"
+  ],
+  "keywords": [
+    "animation",
+    "kamishibai",
+    "paper-story",
+    "scene",
+    "show"
+  ],
+  "author": "bonsai",
+  "license": "MIT",
+  "dependencies": {
+    "fluent-ffmpeg": "^2.1.2",
+    "playwright": "^1.40.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bonsai/kamishibai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bonsai/kamishibai/issues"
+  }
+}
