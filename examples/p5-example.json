@@ -1,0 +1,26 @@
+/**
+ * Example story that uses the p5-sketch plugin.
+ */
+{
+  "schema": "kamishibai.story.v1",
+  "title": "p5-sketch example",
+  "duration_seconds": 18,
+  "scenes": [
+    {
+      "id": "op",
+      "template": "title",
+      "duration_ms": 3000,
+      "data": {
+        "title": "p5-sketch example",
+        "subtitle": "Custom p5.js sketch inside kamishibai"
+      }
+    },
+    {
+      "id": "p5cat",
+      "template": "p5-sketch",
+      "duration_ms": 15000,
+      "data": {
+        "p5sketch": "p => {\n  p.background(0xf4a261);\n  p.noStroke();\n  p.fill('#1a1a2e');\n  p.ellipse(p.width/2, p.height/2, p.width * 0.4);\n  p.fill('#1a1a2e');\n  p.triangle(p.width/2 - 0.32*p.width, p.height*0.22, p.width/2 - 0.14*p.width, p.height*0.03, p.width/2, p.height*0.24);\n  p.triangle(p.width/2 + 0.32*p.width, p.height*0.22, p.width/2, p.height*0.24, p.width/2 + 0.14*p.width, p.height*0.03);\n  p.fill('#f1f1f1');\n  p.ellipse(p.width/2 - 0.11*p.width, p.height/2, p.width * 0.09);\n  p.ellipse(p.width/2 + 0.11*p.width, p.height/2, p.width * 0.09);\n  p.fill('#1a1a2e');\n  p.ellipse(p.width/2 - 0.11*p.width, p.height/2, p.width * 0.035);\n  p.ellipse(p.width/2 + 0.11*p.width, p.height/2, p.width * 0.035);\n  p.stroke('#f1f1f1'); p.strokeWeight(3);\n  for (let i = -1; i <= 1; i++) {\n    p.line(p.width/2 - 0.34*p.width, p.height/2 + i*0.06*p.width, p.width/2 - 0.6*p.width, p.height/2 + i*0.03*p.width);\n    p.line(p.width/2 + 0.34*p.width, p.height/2 + i*0.06*p.width, p.width/2 + 0.6*p.width, p.height/2 + i*0.03*p.width);\n  }\n}"      }
+    }
+  ]
+}

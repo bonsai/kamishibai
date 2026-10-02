@@ -1,27 +1,61 @@
 /**
  * kamishibai engine
- * Play scene-based animation shows from JSON story definitions.
+ * Plays scene-based animation shows from JSON story definitions.
+ *
+ * Plugins extend rendering:
+ *   - render(data, engine): returns HTML string or DOM element
+ *   - css: optional path to template stylesheet
+ *   - setup(engine): optional object merged into the engine
+ *
+ * @example
+ * const show = new Kamishibai(stageEl, story, { plugins: [title, speechBubble] });
+ * await show.play();
  */
 
 class Kamishibai {
-  constructor(container, story) {
+  constructor(container, story, options = {}) {
     this.container = container;
     this.story = story;
     this.current = 0;
     this.timers = [];
+    this.templates = {};
+    this.cssLoaded = Promise.resolve();
+
+    if (Array.isArray(options.plugins)) {
+      this._loadPlugins(options.plugins);
+    }
     this.renderBase();
   }
 
-  renderBase() {
-    this.container.innerHTML = `
-      <div class="kamishibai-stage"></div>
-      <div class="kamishibai-progress"><div class="kamishibai-progress-bar"></div></div>
-    `;
-    this.stage = this.container.querySelector('.kamishibai-stage');
-    this.progressBar = this.container.querySelector('.kamishibai-progress-bar');
+  _loadPlugins(plugins) {
+    for (const plugin of plugins) {
+      if (!plugin.name) continue;
+      if (plugin.render) {
+        this.templates[plugin.name] = plugin.render;
+      }
+      if (plugin.css) {
+        this.cssLoaded = this.cssLoaded.then(() => this._loadCSS(plugin.css));
+      }
+      if (plugin.setup) {
+        const setup = plugin.setup(this);
+        if (setup) Object.assign(this, setup);
+      }
+    }
+  }
+
+  _loadCSS(path) {
+    return new Promise((resolve, reject) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = path;
+      link.onload = resolve;
+      link.onerror = reject;
+      document.head.appendChild(link);
+    });
   }
 
   async play() {
+    await this.cssLoaded;
     this.current = 0;
     this.startTime = performance.now();
     this.progressBar.style.animation = 'none';
@@ -37,117 +71,30 @@ class Kamishibai {
   playScene(scene) {
     return new Promise((resolve) => {
       this.stage.innerHTML = '';
-      const el = this.renderScene(scene);
-      this.stage.appendChild(el);
-
-      const timer = setTimeout(() => {
-        resolve();
-      }, scene.duration_ms);
+      this.renderScene(scene).then((el) => {
+        this.stage.appendChild(el);
+      });
+      const timer = setTimeout(() => resolve(), scene.duration_ms);
       this.timers.push(timer);
     });
   }
 
-  renderScene(scene) {
+  async renderScene(scene) {
+    const render = this.templates[scene.template];
+    if (!render) {
+      throw new Error(`Unknown scene template: ${scene.template}`);
+    }
     const el = document.createElement('div');
     el.className = `kamishibai-scene scene-${scene.template}`;
-
-    switch (scene.template) {
-      case 'title':
-        el.innerHTML = this.titleTemplate(scene.data);
-        break;
-      case 'speech-bubble':
-        el.innerHTML = this.speechBubbleTemplate(scene.data);
-        break;
-      case 'yonkoma':
-        el.innerHTML = this.yonkomaTemplate(scene.data);
-        break;
-      case 'two-line':
-        el.innerHTML = this.twoLineTemplate(scene.data);
-        break;
-      case 'screenshot':
-        el.innerHTML = this.screenshotTemplate(scene.data);
-        break;
-      default:
-        el.textContent = JSON.stringify(scene);
+    const rendered = await render(scene.data || {}, this);
+    if (typeof rendered === 'string') {
+      el.innerHTML = rendered;
+    } else if (rendered && rendered.outerHTML) {
+      el.innerHTML = rendered.outerHTML;
+    } else {
+      el.innerHTML = '';
     }
     return el;
-  }
-
-  titleTemplate(data) {
-    return `
-      <div class="kamishibai-title-card">
-        <h1>${this.escape(data.title)}</h1>
-        <p>${this.escape(data.subtitle || '')}</p>
-      </div>
-    `;
-  }
-
-  speechBubbleTemplate(data) {
-    const chars = (data.characters || []).map((c, i) => `
-      <div class="kamishibai-character char-${c.position || (i % 2 === 0 ? 'left' : 'right')}">
-        <svg viewBox="0 0 90 140"><circle cx="45" cy="30" r="22" fill="${c.color || '#f4a261'}"/>
-          <rect x="23" y="55" width="44" height="60" rx="10" fill="${c.body || '#457b9d'}"/>
-          <circle cx="37" cy="28" r="3" fill="#1a1a2e"/><circle cx="53" cy="28" r="3" fill="#1a1a2e"/>
-          <path d="M38,38 Q45,44 52,38" fill="none" stroke="#1a1a2e" stroke-width="2"/>
-        </svg>
-      </div>
-    `).join('');
-
-    const bubbles = (data.bubbles || []).map((b, i) => `
-      <div class="kamishibai-bubble bubble-${b.position || (i % 2 === 0 ? 'left' : 'right')}" style="animation-delay: ${b.delay_ms || i * 1500}ms">
-        <strong>${this.escape(b.speaker)}:</strong> ${this.escape(b.text)}
-      </div>
-    `).join('');
-
-    return `
-      ${chars}
-      ${bubbles}
-      <div class="kamishibai-narration">${this.escape(data.narration || '')}</div>
-    `;
-  }
-
-  yonkomaTemplate(data) {
-    const panels = (data.panels || []).map((p, i) => `
-      <div class="kamishibai-panel" style="animation-delay: ${i * 1000}ms">
-        <div class="panel-label">${this.escape(p.label)}</div>
-        <div class="panel-text">${this.escape(p.text)}</div>
-      </div>
-    `).join('');
-    return `
-      <div class="kamishibai-yonkoma-grid">${panels}</div>
-      <div class="kamishibai-narration">${this.escape(data.narration || '')}</div>
-    `;
-  }
-
-  twoLineTemplate(data) {
-    const lines = (data.lines || []).map((l, i) => `
-      <div class="kamishibai-two-line-line line-${l.speaker}" style="animation-delay: ${i * 2000}ms">
-        <span class="speaker">${this.escape(l.speaker)}</span>
-        <span class="text">${this.escape(l.text)}</span>
-      </div>
-    `).join('');
-    return `
-      <div class="kamishibai-two-line">
-        <h2>${this.escape(data.title || '')}</h2>
-        ${lines}
-      </div>
-    `;
-  }
-
-  screenshotTemplate(data) {
-    const scenes = (data.scenes || []).map((s, i) => `
-      <div class="kamishibai-screenshot-scene" style="animation-delay: ${s.delay_ms || i * 1000}ms">
-        <span class="time">${this.escape(s.time)}</span>
-        <span class="type">${this.escape(s.type)}</span>
-        <p>${this.escape(s.text)}</p>
-      </div>
-    `).join('');
-    return `
-      <div class="kamishibai-screenshot">
-        <h2>${this.escape(data.title || '')}</h2>
-        ${scenes}
-      </div>
-    `;
   }
 
   escape(text) {
@@ -159,6 +106,21 @@ class Kamishibai {
   stop() {
     this.timers.forEach(clearTimeout);
     this.timers = [];
+  }
+
+  // --- dynamic asset loading ---
+
+  /** Load p5.js (global CDN) if not present. */
+  async _loadP5() {
+    if (typeof window !== 'undefined' && window.p5) return window.p5;
+    return new Promise((resolve, reject) => {
+      if (window.p5) { resolve(window.p5); return; }
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js';
+      script.onload = () => resolve(window.p5);
+      script.onerror = () => reject(new Error('failed to load p5.js from CDN'));
+      document.body.appendChild(script);
+    });
   }
 }
 

@@ -8,15 +8,19 @@
 </head>
 <body>
   <div id="stage"></div>
-  <script src="../js/kamishibai.js"></script>
-  <script>
+  <script type="module">
+    import Kamishibai from '../js/kamishibai.js';
+    import { defaultPlugins } from '../js/plugins/index.js';
+
     async function loadStory() {
       const params = new URLSearchParams(location.search);
       const storyUrl = params.get('story') || '../examples/paper-loop.json';
       const res = await fetch(storyUrl);
       const story = await res.json();
-      const show = new Kamishibai(document.getElementById('stage'), story);
-      show.play();
+      const show = new Kamishibai(document.getElementById('stage'), story, {
+        plugins: defaultPlugins,
+      });
+      await show.play();
     }
     loadStory();
   </script>

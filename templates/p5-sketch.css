@@ -1,0 +1,12 @@
+/* p5-sketch template styles */
+.kamishibai-p5-sketch {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.kamishibai-p5-canvas {
+  display: block;
+}
